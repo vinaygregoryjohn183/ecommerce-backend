@@ -1,10 +1,14 @@
 import { Injectable, ConflictException, UnauthorizedException } from '@nestjs/common';
 import { UsersService } from '../users/users.service';
 import * as bcrypt from 'bcrypt';
+import { JwtService } from '@nestjs/jwt';
 
 @Injectable()
 export class AuthService {
-  constructor(private usersService: UsersService) {} // Dependency Injection!
+  constructor(
+    private usersService: UsersService,
+    private jwtService: JwtService
+  ) {} // Dependency Injection!
 
   async register(email: string, plainTextPassword: string) {
     // 1. Check if user already exists
@@ -32,14 +36,18 @@ export class AuthService {
       throw new UnauthorizedException('Invalid credentials');
     }
 
+    // Prepare the payload (the data packed inside the JWT)
+    // 'sub' (subject) is standard for holding the user ID
+    const payload = { sub: user.id, email: user.email };
+
     return {
       message: 'Login successful',
       user: {
         id: user.id,
         email: user.email,
       },
-      // Note for Session 2: Replace this with an actual signed JWT using @nestjs/jwt!
-      access_token: 'mock-jwt-token-replace-in-session-2'
+      // Sign the token synchronously/asynchronously using our environment's secret
+      access_token: await this.jwtService.signAsync(payload)
     };
   }
 }
