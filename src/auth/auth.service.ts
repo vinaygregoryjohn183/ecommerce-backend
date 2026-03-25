@@ -1,4 +1,4 @@
-import { Injectable, ConflictException } from '@nestjs/common';
+import { Injectable, ConflictException, UnauthorizedException } from '@nestjs/common';
 import { UsersService } from '../users/users.service';
 import * as bcrypt from 'bcrypt';
 
@@ -19,5 +19,27 @@ export class AuthService {
 
     // 3. Save to database using the UsersService
     return this.usersService.create(email, hashedPassword);
+  }
+
+  async login(email: string, plainTextPassword: string) {
+    const user = await this.usersService.findByEmail(email);
+    if (!user) {
+      throw new UnauthorizedException('Invalid credentials');
+    }
+
+    const isMatch = await bcrypt.compare(plainTextPassword, user.passwordHash);
+    if (!isMatch) {
+      throw new UnauthorizedException('Invalid credentials');
+    }
+
+    return {
+      message: 'Login successful',
+      user: {
+        id: user.id,
+        email: user.email,
+      },
+      // Note for Session 2: Replace this with an actual signed JWT using @nestjs/jwt!
+      access_token: 'mock-jwt-token-replace-in-session-2'
+    };
   }
 }

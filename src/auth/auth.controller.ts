@@ -10,4 +10,9 @@ export class AuthController {
     // Note: We use 'any' here for speed, but in real apps we'd use a DTO class!
     return this.authService.register(body.email, body.password);
   }
+
+  @Post('login') // Matches URL /auth/login
+  login(@Body() body: any) {
+    return this.authService.login(body.email, body.password);
+  }
 }
