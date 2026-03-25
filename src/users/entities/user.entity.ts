@@ -1,4 +1,5 @@
-import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, CreateDateColumn, OneToMany } from 'typeorm';
+import { Order } from '../../orders/entities/order.entity';
 
 @Entity('users') // This tells Postgres to name the table "users"
 export class User {
@@ -13,4 +14,8 @@ export class User {
 
   @CreateDateColumn() // Magically records the exact time the row was inserted
   createdAt: Date;
+
+  // One User can have Many Orders
+  @OneToMany(() => Order, (order) => order.user)
+  orders: Order[];
 }
